@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="An interactive cybersecurity training simulator focused on the CIA Triad (Confidentiality, Integrity, Availability) for Naresuan University CPE & IIE programs.">
+  <title>SOC Terminal: CIA Triad Training Simulator</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Google Identity Services (GSI) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <!-- Futuristic scanline effect across screen -->
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <main class="app-shell">
+    <!-- Top Terminal bar -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="pulse-dot"></span>
+        <span class="brand-title">SOC_TERMINAL_V1.3_</span>
+      </div>
+      <div class="session-info">
+        <button id="scanline-toggle-btn" class="btn-toggle-scanlines no-print" type="button">CRT SCREEN: ON</button>
+        <span id="player-badge" class="badge badge-dim is-hidden">ANALYST: <span id="player-display-name">GUEST</span></span>
+        <span class="badge badge-success">SYSTEM: ACTIVE</span>
+      </div>
+      <div class="best-score-container">
+        <span class="score-label">HIGH_SCORE:</span>
+        <strong id="best-score">0000</strong>
+      </div>
+    </header>
+
+    <!-- Content Area containing screens -->
+    <div class="screen-container">
+
+      <!-- SCREEN 1: Login / Start Screen -->
+      <section id="start-screen" class="screen">
+        <div class="terminal-intro">
+          <p class="cyber-subtitle">Naresuan University - CPE & IIE Cybersecurity Lab</p>
+          <h1 class="cyber-title">CIA TRIAD<br><span class="highlight">TACTICAL SIMULATOR</span></h1>
+          <p class="description">
+            Secure the campus network infrastructure. Mitigate cyber attacks, prevent data leaks, protect system integrity, and guarantee service availability across three tactical stages.
+          </p>
+
+          <form id="login-form" class="auth-form">
+            <!-- Google Sign-In Container -->
+            <div id="google-login-section" class="google-login-section">
+              <p class="oauth-instruction" style="margin-bottom: 12px; font-size: 0.85rem; color: var(--color-text-muted); font-weight: 600; text-align: center;">
+                SECURE UNIVERSITY SIGN-IN REQUIRED (@nu.ac.th)
+              </p>
+              <div id="google-signin-btn" class="google-signin-btn" style="display: flex; justify-content: center;"></div>
+            </div>
+            
+            <div class="oauth-settings-trigger" style="text-align: center; margin-top: 10px;">
+              <button id="oauth-settings-btn" class="btn-settings-link" type="button">⚙️ Configure Google OAuth ID</button>
+            </div>
+          </form>
+
+          <div class="keyboard-note" aria-hidden="true">
+            <span>KEYBOARD CONTROLS ENROLLED: <strong>[1]-[4]</strong> to select answers, <strong>[ENTER]</strong> to proceed.</span>
+          </div>
+        </div>
+
+        <!-- Terminal Diagnostic panel on right -->
+        <aside class="diag-panel">
+          <div class="panel-header">SYSTEM DIAGNOSTICS</div>
+          <div class="panel-body">
+            <div class="diag-line">> LOCATING INFRASTRUCTURE... <span class="text-success">[OK]</span></div>
+            <div class="diag-line">> SECURING TRUST BOUNDARIES... <span class="text-success">[OK]</span></div>
+            <div class="diag-line">> STAGES LOADED:</div>
+            <ul class="stage-list">
+              <li><span class="c-bullet">●</span> <strong>STAGE 1: CONFIDENTIALITY (C)</strong> - Prevent unauthorized data leaks.</li>
+              <li><span class="i-bullet">●</span> <strong>STAGE 2: INTEGRITY (I)</strong> - Verify checksums and prevent tampering.</li>
+              <li><span class="a-bullet">●</span> <strong>STAGE 3: AVAILABILITY (A)</strong> - Mitigate DDoS and build redundancy.</li>
+            </ul>
+            <div class="diag-line text-warning">> STRIKES LIMIT: 3 ATTACKS PENETRATED BEFORE SYSTEM FAILS.</div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- SCREEN 2: Gameplay Screen -->
+      <section id="game-screen" class="screen is-hidden" aria-live="polite">
+        <!-- Sidebar status panel -->
+        <aside class="game-sidebar">
+          <div class="stage-header">
+            <span id="stage-badge" class="zone-badge">ZONE: C</span>
+            <h2 id="stage-title">CONFIDENTIALITY</h2>
+          </div>
+          
+          <div class="meters-container">
+            <div class="meter-group">
+              <span class="meter-label">SCORE</span>
+              <div class="value-box" id="score-display">0000</div>
+            </div>
+            <div class="meter-group">
+              <span class="meter-label">DECRYPTION STRIKES</span>
+              <div id="lives-display" class="lives-indicator">
+                <span class="life-point active" aria-label="Key 1">🔐</span>
+                <span class="life-point active" aria-label="Key 2">🔐</span>
+                <span class="life-point active" aria-label="Key 3">🔐</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="progress-section">
+            <div class="progress-header">
+              <span>STAGE PROGRESS</span>
+              <span id="progress-percent">33%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div id="progress-bar-fill" class="progress-bar-fill" style="width: 33%"></div>
+            </div>
+            <div id="progress-text" class="progress-text-sub">Question 1 of 3</div>
+          </div>
+        </aside>
+
+        <!-- Main workspace containing active challenge -->
+        <div class="game-workspace">
+          <!-- Active challenge info -->
+          <div class="challenge-meta">
+            <span id="challenge-type-tag" class="badge">MULTIPLE CHOICE</span>
+            <button id="hint-button" class="btn btn-sm btn-outline" type="button">ACCESS HINT DATA</button>
+          </div>
+
+          <div class="workspace-card">
+            <h3 id="question-title" class="challenge-title">Wi-Fi Eavesdropping</h3>
+            <p id="question-prompt" class="challenge-prompt">
+              An attacker is sniffing wireless network packets outside Naresuan University. You need to transmit sensitive grade records to the server. Which method guarantees confidentiality in transit?
+            </p>
+
+            <!-- Interactive panel generated by app.js (e.g. multiple choice list, hash tables, ddos sliders) -->
+            <div id="interactive-area" class="interactive-area">
+              <!-- Content gets dynamically populated -->
+            </div>
+
+            <!-- Dynamic hint output -->
+            <div id="hint-panel" class="hint-panel is-hidden">
+              <div class="hint-header">HINT_DATABANK_</div>
+              <p id="hint-text">This is a hint text.</p>
+            </div>
+
+            <!-- Verification Feedback -->
+            <div id="feedback-panel" class="feedback-panel is-hidden">
+              <div class="feedback-status">
+                <span id="feedback-icon"></span>
+                <strong id="feedback-title">PROTOCOL DECRYPTED</strong>
+              </div>
+              <p id="feedback-text" class="feedback-text">
+                Explanation content goes here.
+              </p>
+              <button id="next-button" class="btn btn-success" type="button">PROCEED TO NEXT TARGET [ENTER]</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 3: Results & Stats Dashboard Screen -->
+      <section id="result-screen" class="screen is-hidden">
+        <div class="results-layout">
+          <div class="results-header">
+            <div class="badge badge-dim">MISSION_ACCOMPLISHED</div>
+            <h1 class="results-title">TACTICAL EVALUATION REPORT</h1>
+            <p class="eval-summary">
+              Learning outcomes validated for Analyst <span id="eval-name" class="highlight">GUEST</span> (ID: <span id="eval-id">N/A</span>).
+            </p>
+          </div>
+
+          <!-- Overall metrics grid -->
+          <div class="results-grid">
+            <div class="card result-card main-grade-card">
+              <div class="badge-graphic" id="eval-badge">👑</div>
+              <h2 id="eval-title" class="security-rank">CHIEF INFORMATION SECURITY OFFICER</h2>
+              <p id="eval-desc" class="security-desc">Excellent understanding! You successfully balanced Confidentiality, Integrity, and Availability constraints.</p>
+              <div class="score-summary">
+                <span class="lbl">FINAL_ACCUMULATED_SCORE:</span>
+                <strong id="eval-score" class="big-score">1050</strong>
+              </div>
+            </div>
+
+            <div class="card result-card stats-breakdown-card">
+              <h3>LEARNING COMPETENCY BREAKDOWN</h3>
+              
+              <div class="stat-row">
+                <div class="stat-meta">
+                  <span>CONFIDENTIALITY (C)</span>
+                  <span id="stat-c-val">3/3 (100%)</span>
+                </div>
+                <div class="bar-container"><div id="stat-c-bar" class="stat-bar c-bar" style="width: 100%"></div></div>
+              </div>
+
+              <div class="stat-row">
+                <div class="stat-meta">
+                  <span>INTEGRITY (I)</span>
+                  <span id="stat-i-val">2/3 (66%)</span>
+                </div>
+                <div class="bar-container"><div id="stat-i-bar" class="stat-bar i-bar" style="width: 66%"></div></div>
+              </div>
+
+              <div class="stat-row">
+                <div class="stat-meta">
+                  <span>AVAILABILITY (A)</span>
+                  <span id="stat-a-val">3/3 (100%)</span>
+                </div>
+                <div class="bar-container"><div id="stat-a-bar" class="stat-bar a-bar" style="width: 100%"></div></div>
+              </div>
+
+              <div class="time-stat">
+                <span>TOTAL MISSION DURATION: </span>
+                <strong id="eval-time">02:34</strong>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="results-actions">
+            <button id="show-cert-button" class="btn btn-primary" type="button">GENERATE CERTIFICATE OF OUTCOME</button>
+            <button id="restart-button" class="btn btn-outline" type="button">RE-INITIALIZE SIMULATION</button>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- MODAL: Printable Certificate -->
+  <div id="cert-modal" class="modal-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="cert-title">
+    <div class="modal-container">
+      <button id="close-cert-button" class="modal-close" type="button" aria-label="Close modal">&times;</button>
+      
+      <!-- Certificate printable frame -->
+      <div id="certificate" class="certificate-frame">
+        <div class="cert-border-glow"></div>
+        <div class="cert-body">
+          <div class="cert-header">
+            <div class="cert-logo">🛡️</div>
+            <div class="cert-institution">NARESUAN UNIVERSITY</div>
+            <div class="cert-department">Department of Electrical and Computer Engineering</div>
+          </div>
+
+          <h2 id="cert-title" class="cert-heading">CERTIFICATE OF TRAINING OUTCOME</h2>
+          <p class="cert-subtitle">This verifies the successful completion of the tactical simulation on the</p>
+          <div class="cert-topic">CIA TRIAD CYBERSECURITY FRAMEWORK</div>
+          
+          <p class="cert-awarded">Awarded to</p>
+          <div class="cert-recipient" id="cert-recipient-name">John Doe</div>
+          <p class="cert-meta" id="cert-recipient-id">Student ID: 660601XXXX</p>
+
+          <div class="cert-outcomes-grid">
+            <div class="cert-outcome-metric">
+              <span class="c-lbl">CONFIDENTIALITY</span>
+              <strong id="cert-c-score">100%</strong>
+            </div>
+            <div class="cert-outcome-metric">
+              <span class="i-lbl">INTEGRITY</span>
+              <strong id="cert-i-score">100%</strong>
+            </div>
+            <div class="cert-outcome-metric">
+              <span class="a-lbl">AVAILABILITY</span>
+              <strong id="cert-a-score">100%</strong>
+            </div>
+          </div>
+
+          <div class="cert-footer">
+            <div class="cert-sign">
+              <span class="sign-line"></span>
+              <span class="sign-name">CYBERSECURITY LAB GM</span>
+              <span class="sign-title">Verification Authority</span>
+            </div>
+            <div class="cert-details">
+              <div class="cert-date-box">DATE: <span id="cert-date">2026-07-01</span></div>
+              <div class="cert-hash-box">HASH: <span id="cert-hash">SHA256_F98A7D...</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions no-print">
+        <button id="print-button" class="btn btn-primary" type="button">PRINT / SAVE AS PDF</button>
+        <button id="dismiss-modal-button" class="btn btn-outline" type="button">CLOSE</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sound toggles and background visual tags -->
+  <div class="system-status-indicator no-print">
+    <span>AUDIO: OFF</span>
+  </div>
+
+  <!-- MODAL: OAuth Settings Configuration -->
+  <div id="oauth-settings-modal" class="modal-overlay is-hidden" role="dialog" aria-modal="true" aria-labelledby="oauth-settings-title">
+    <div class="modal-container modal-small">
+      <button id="close-oauth-modal-btn" class="modal-close" type="button" aria-label="Close modal">&times;</button>
+      <div class="card result-card">
+        <h2 id="oauth-settings-title" class="panel-header">GOOGLE OAUTH CONFIGURATION</h2>
+        <p class="description" style="font-size:0.85rem; margin-bottom:16px;">
+          To enable secure Naresuan University Google Sign-In for students, enter your Google Cloud Console Client ID. This setting is saved locally in this browser.
+        </p>
+        <div class="form-group" style="margin-bottom:16px; display:flex; flex-direction:column; gap:6px;">
+          <label for="oauth-client-id" style="font-family:var(--font-display); font-size:0.75rem; color:var(--color-text-muted);">Google Client ID</label>
+          <input id="oauth-client-id" type="text" placeholder="e.g. xxxxx.apps.googleusercontent.com" style="width:100%; background:var(--bg-terminal); border:1px solid var(--color-border); border-radius:6px; padding:12px; color:var(--color-text-main); font-family:var(--font-mono);">
+        </div>
+        <div class="modal-actions" style="margin-top:20px; display:flex; gap:12px; justify-content:flex-end;">
+          <button id="save-oauth-btn" class="btn btn-primary btn-sm" type="button">SAVE CONFIG</button>
+          <button id="clear-oauth-btn" class="btn btn-outline btn-sm" type="button">CLEAR</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="game-core.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
