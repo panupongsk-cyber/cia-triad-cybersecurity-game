@@ -83,6 +83,70 @@
         </aside>
       </section>
 
+      <!-- SCREEN: Knowledge Brief -->
+      <section id="brief-screen" class="screen is-hidden">
+        <div class="results-layout" style="max-width:960px; margin:0 auto; padding:32px 24px;">
+          <div class="results-header">
+            <div class="badge badge-dim">PRE-MISSION INTEL BRIEFING</div>
+            <h1 class="results-title">CIA TRIAD — KNOWLEDGE BRIEF</h1>
+            <p class="description">Study these three pillars before entering the simulation. You will face real-world scenarios that test each one.</p>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px; margin-bottom:24px;">
+            <div class="card result-card" style="border-top:3px solid #00f3ff;">
+              <div class="badge" style="background:rgba(0,243,255,0.1);color:#00f3ff;margin-bottom:12px;">C — CONFIDENTIALITY</div>
+              <p style="font-size:0.85rem;color:var(--color-text-muted);margin-bottom:12px;">Only <strong style="color:var(--color-text-main);">authorized users</strong> can read or access sensitive data.</p>
+              <div class="panel-header" style="font-size:0.7rem;margin-bottom:6px;">ATTACK SCENARIOS</div>
+              <ul class="stage-list" style="font-size:0.82rem;margin-bottom:10px;">
+                <li>Wi-Fi Eavesdropping / Packet Sniffing</li>
+                <li>Phishing & Credential Theft</li>
+                <li>Privilege Escalation (unauthorized role access)</li>
+              </ul>
+              <div class="panel-header" style="font-size:0.7rem;margin-bottom:6px;">KEY CONTROLS</div>
+              <ul class="stage-list" style="font-size:0.82rem;">
+                <li>TLS / End-to-End Encryption</li>
+                <li>Role-Based Access Control (RBAC)</li>
+                <li>Multi-Factor Authentication (MFA)</li>
+              </ul>
+            </div>
+            <div class="card result-card" style="border-top:3px solid #10b981;">
+              <div class="badge" style="background:rgba(16,185,129,0.1);color:#10b981;margin-bottom:12px;">I — INTEGRITY</div>
+              <p style="font-size:0.85rem;color:var(--color-text-muted);margin-bottom:12px;">Data must <strong style="color:var(--color-text-main);">not be altered</strong> without being detected.</p>
+              <div class="panel-header" style="font-size:0.7rem;margin-bottom:6px;">ATTACK SCENARIOS</div>
+              <ul class="stage-list" style="font-size:0.82rem;margin-bottom:10px;">
+                <li>SQL Injection (corrupt database records)</li>
+                <li>File Tampering (hash mismatch)</li>
+                <li>Man-in-the-Middle payload modification</li>
+              </ul>
+              <div class="panel-header" style="font-size:0.7rem;margin-bottom:6px;">KEY CONTROLS</div>
+              <ul class="stage-list" style="font-size:0.82rem;">
+                <li>SHA-256 Hash Verification</li>
+                <li>Digital Signatures (RSA / ECDSA)</li>
+                <li>Parameterized Queries (prepared statements)</li>
+              </ul>
+            </div>
+            <div class="card result-card" style="border-top:3px solid #f59e0b;">
+              <div class="badge" style="background:rgba(245,158,11,0.1);color:#f59e0b;margin-bottom:12px;">A — AVAILABILITY</div>
+              <p style="font-size:0.85rem;color:var(--color-text-muted);margin-bottom:12px;">Systems must remain <strong style="color:var(--color-text-main);">accessible</strong> to authorized users at all times.</p>
+              <div class="panel-header" style="font-size:0.7rem;margin-bottom:6px;">ATTACK SCENARIOS</div>
+              <ul class="stage-list" style="font-size:0.82rem;margin-bottom:10px;">
+                <li>DDoS Attack (volumetric traffic flood)</li>
+                <li>Ransomware (disk encryption)</li>
+                <li>Single Point of Failure (SPOF)</li>
+              </ul>
+              <div class="panel-header" style="font-size:0.7rem;margin-bottom:6px;">KEY CONTROLS</div>
+              <ul class="stage-list" style="font-size:0.82rem;">
+                <li>Load Balancers + Rate Limiting / WAF</li>
+                <li>Offline Backups & Recovery Plans</li>
+                <li>Hardware Redundancy (RAID, failover)</li>
+              </ul>
+            </div>
+          </div>
+          <div class="results-actions" style="justify-content:center;">
+            <button id="start-game-btn" class="btn btn-primary" type="button">ENTER SIMULATION ➔</button>
+          </div>
+        </div>
+      </section>
+
       <!-- SCREEN 2: Gameplay Screen -->
       <section id="game-screen" class="screen is-hidden" aria-live="polite">
         <!-- Sidebar status panel -->
@@ -312,6 +376,10 @@
     </div>
   </div>
 
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
   <script src="game-core.js"></script>
   <script src="app.js"></script>
 </body>

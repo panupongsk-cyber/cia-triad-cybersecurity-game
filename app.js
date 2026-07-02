@@ -2,6 +2,18 @@
  * CIA Triad Cybersecurity Game - Application Logic & State Controller
  */
 
+// Firebase initialization (itpe-practice project, gameResults collection)
+const _fbApp = firebase.initializeApp({
+  apiKey: "AIzaSyDOwWZssk7a19R5aYnKpqx2oiSfbNLNLXA",
+  authDomain: "itpe-practice.firebaseapp.com",
+  projectId: "itpe-practice",
+  storageBucket: "itpe-practice.firebasestorage.app",
+  messagingSenderId: "254567748345",
+  appId: "1:254567748345:web:c9e448ccfac9e249584828"
+});
+const _db = firebase.firestore();
+const _auth = firebase.auth();
+
 // Game State Object
 let state = {
   playerName: "GUEST",
@@ -27,6 +39,7 @@ let state = {
 // DOM Elements
 const screens = {
   start: document.getElementById("start-screen"),
+  brief: document.getElementById("brief-screen"),
   game: document.getElementById("game-screen"),
   result: document.getElementById("result-screen")
 };
@@ -198,8 +211,12 @@ document.addEventListener("DOMContentLoaded", () => {
           state.studentId = "STAFF/INSTRUCTOR";
         }
 
-        // Auto Login
-        initializeGame();
+        // Sign into Firebase with the Google credential (enables Firestore security rules)
+        const fbCredential = firebase.auth.GoogleAuthProvider.credential(response.credential);
+        _auth.signInWithCredential(fbCredential).catch(e => console.warn("Firebase sign-in:", e));
+
+        // Show knowledge brief before starting the game
+        showScreen("brief");
       } catch (err) {
         console.error("JWT credential parse error", err);
         alert("Failed to parse Google sign-in payload.");
@@ -232,6 +249,9 @@ document.addEventListener("DOMContentLoaded", () => {
   gameUI.nextButton.addEventListener("click", () => {
     advanceGame();
   });
+
+  // Brief screen: enter simulation button
+  document.getElementById("start-game-btn").addEventListener("click", initializeGame);
 
   // Restart Button click
   resultUI.restartButton.addEventListener("click", () => {
@@ -701,6 +721,30 @@ function endSimulation() {
   if (state.score > cachedBest) {
     localStorage.setItem("cia_best_score", state.score);
     topbar.bestScore.textContent = state.score.toString().padStart(4, "0");
+  }
+
+  saveGameStats();
+}
+
+async function saveGameStats() {
+  if (!state.googleUserEmail) return;
+  try {
+    await _db.collection("gameResults").add({
+      gameId: "cia-triad",
+      playerName: state.playerName,
+      email: state.googleUserEmail,
+      studentId: state.studentId,
+      score: state.score,
+      breakdown: {
+        C: state.zoneScores.C,
+        I: state.zoneScores.I,
+        A: state.zoneScores.A
+      },
+      timeTakenSeconds: state.timeElapsed,
+      completedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (e) {
+    console.error("Stats save failed:", e);
   }
 }
 
